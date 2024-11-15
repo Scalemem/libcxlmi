@@ -592,6 +592,13 @@ int cxlmi_cmd_fmapi_get_domain_validation_sv(struct cxlmi_endpoint *ep,
 			struct cxlmi_tunnel_info *ti,
 			struct cxlmi_cmd_fmapi_get_domain_validation_sv_req *in,
 			struct cxlmi_cmd_fmapi_get_domain_validation_sv_rsp *ret);
+
+#define MAX_VPPBS_PER_VCS 32
+#define MAX_VCS 32
+int cxlmi_cmd_fmapi_get_virtual_cxl_switch_info(struct cxlmi_endpoint *ep,
+			struct cxlmi_tunnel_info *ti,
+			struct cxlmi_cmd_fmapi_get_virtual_cxl_switch_info_req *in,
+			struct cxlmi_cmd_fmapi_get_virtual_cxl_switch_info_rsp *ret);
 int cxlmi_cmd_fmapi_get_ld_info(struct cxlmi_endpoint *ep,
 			struct cxlmi_tunnel_info *ti,
 			struct cxlmi_cmd_fmapi_get_ld_info *ret);

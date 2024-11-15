@@ -590,6 +590,35 @@ struct cxlmi_cmd_fmapi_get_domain_validation_sv_rsp {
 	uint8_t secret_value_uuid[0x10];
 } __attribute__((packed));
 
+/* CXL r3.1 Section 7.6.7.2.1: Get Virtual CXL switch Info (Opcode 5200h) */
+struct cxlmi_cmd_fmapi_get_virtual_cxl_switch_info_req {
+	uint8_t start_vppb;
+	uint8_t vppb_list_limit;
+	uint8_t num_vcs;
+	uint8_t vcs_ids[];
+} __attribute__((packed));
+
+struct cxlmi_cmd_fmapi_vppb_info {
+	uint8_t vppb_binding_status;
+	uint8_t vppb_bound_port_id;
+	uint8_t vppb_bound_ld_id;
+	uint8_t rsv1;
+} __attribute__((packed));
+
+struct cxlmi_cmd_fmapi_vcs_info_block {
+	uint8_t vcs_id;
+	uint8_t vcs_state;
+	uint8_t usp_id;
+	uint8_t num_vppbs;
+	struct cxlmi_cmd_fmapi_vppb_info vppbs[];
+} __attribute__((packed));
+
+struct cxlmi_cmd_fmapi_get_virtual_cxl_switch_info_rsp {
+	uint8_t num_vcs;
+	uint8_t rsv1[3];
+	struct cxlmi_cmd_fmapi_vcs_info_block vcs_info[];
+} __attribute__((packed));
+
 /* CXL r3.1 Section 7.6.7.4.1: Get LD Info (Opcode 5400h) */
 struct cxlmi_cmd_fmapi_get_ld_info {
 	uint64_t memory_size;

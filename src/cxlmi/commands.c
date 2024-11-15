@@ -2002,6 +2002,70 @@ CXLMI_EXPORT int cxlmi_cmd_fmapi_get_domain_validation_sv(struct cxlmi_endpoint 
 	return rc;
 }
 
+CXLMI_EXPORT int cxlmi_cmd_fmapi_get_virtual_cxl_switch_info(struct cxlmi_endpoint *ep,
+			    struct cxlmi_tunnel_info *ti,
+			    struct cxlmi_cmd_fmapi_get_virtual_cxl_switch_info_req *in,
+			    struct cxlmi_cmd_fmapi_get_virtual_cxl_switch_info_rsp *ret)
+{
+	struct cxlmi_cmd_fmapi_get_virtual_cxl_switch_info_req *req_pl;
+	struct cxlmi_cmd_fmapi_get_virtual_cxl_switch_info_rsp *rsp_pl;
+	_cleanup_free_ struct cxlmi_cci_msg *req = NULL;
+	_cleanup_free_ struct cxlmi_cci_msg *rsp = NULL;
+	ssize_t req_sz, rsp_sz;
+	int i, rc = -1;
+
+	// Below two checks, currently limit the user on the requested number of vcs and vppbs_per_vcs,
+	// so that the response message payload does not exceed 1024 bytes in size as stated per DSP0234.
+
+	if (in->vppb_list_limit < 1 || in->vppb_list_limit > MAX_VPPBS_PER_VCS)
+		return rc;
+
+	if (in->num_vcs < 1 || in->num_vcs > MAX_VCS)
+		return rc;
+
+	req_sz = sizeof(*req_pl) + in->num_vcs + sizeof(*req);
+	req = calloc(1, req_sz);
+	if (!req)
+		return -1;
+
+	arm_cci_request(ep, req, sizeof(*req_pl) + in->num_vcs,
+			VIRTUAL_SWITCH, GET_VIRTUAL_CXL_SWITCH_INFO);
+	req_pl = (struct cxlmi_cmd_fmapi_get_virtual_cxl_switch_info_req *)req->payload;
+
+	req_pl->start_vppb = in->start_vppb;
+	req_pl->vppb_list_limit = in->vppb_list_limit;
+	req_pl->num_vcs = in->num_vcs;
+	for (i = 0; i < in->num_vcs; i++)
+		req_pl->vcs_ids[i] = in->vcs_ids[i];
+
+	size_t vcs_info_block_max_sz = sizeof(struct cxlmi_cmd_fmapi_vcs_info_block) + in->vppb_list_limit * sizeof(struct cxlmi_cmd_fmapi_vppb_info);
+	size_t rsp_pl_sz = sizeof(*rsp_pl) + in->num_vcs * vcs_info_block_max_sz;
+	rsp_sz = sizeof(*rsp) + rsp_pl_sz;
+	rsp = calloc(1, rsp_sz);
+	if (!rsp)
+		return -1;
+
+	rc = send_cmd_cci(ep, ti, req, req_sz, rsp, rsp_sz, rsp_sz);
+	if (rc)
+		return rc;
+
+	rsp_pl = (struct cxlmi_cmd_fmapi_get_virtual_cxl_switch_info_rsp *)rsp->payload;
+	memset(ret, 0, sizeof(*ret));
+
+	ret->num_vcs = rsp_pl->num_vcs;
+	for (i = 0; i < rsp_pl->num_vcs; i++) {
+		ret->vcs_info[i].vcs_id = rsp_pl->vcs_info[i].vcs_id;
+		ret->vcs_info[i].vcs_state = rsp_pl->vcs_info[i].vcs_state;
+		ret->vcs_info[i].usp_id = rsp_pl->vcs_info[i].usp_id;
+		ret->vcs_info[i].num_vppbs = rsp_pl->vcs_info[i].num_vppbs;
+		for (int j = 0; j < rsp_pl->vcs_info[i].num_vppbs; j++) {
+			ret->vcs_info[i].vppbs[j] = rsp_pl->vcs_info[i].vppbs[j];
+		}
+	}
+
+	return rc;
+}
+
 CXLMI_EXPORT int cxlmi_cmd_fmapi_get_ld_info(struct cxlmi_endpoint *ep,
 					  struct cxlmi_tunnel_info *ti,
 					  struct cxlmi_cmd_fmapi_get_ld_info *ret)
