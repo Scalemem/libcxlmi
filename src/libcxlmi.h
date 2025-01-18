@@ -599,6 +599,12 @@ int cxlmi_cmd_fmapi_get_virtual_cxl_switch_info(struct cxlmi_endpoint *ep,
 			struct cxlmi_tunnel_info *ti,
 			struct cxlmi_cmd_fmapi_get_virtual_cxl_switch_info_req *in,
 			struct cxlmi_cmd_fmapi_get_virtual_cxl_switch_info_rsp *ret);
+int cxlmi_cmd_fmapi_bind_vppb(struct cxlmi_endpoint *ep,
+			struct cxlmi_tunnel_info *ti,
+			struct cxlmi_cmd_fmapi_bind_vppb *in);
+int cxlmi_cmd_fmapi_unbind_vppb(struct cxlmi_endpoint *ep,
+			struct cxlmi_tunnel_info *ti,
+			struct cxlmi_cmd_fmapi_unbind_vppb *in);
 int cxlmi_cmd_fmapi_get_ld_info(struct cxlmi_endpoint *ep,
 			struct cxlmi_tunnel_info *ti,
 			struct cxlmi_cmd_fmapi_get_ld_info *ret);
