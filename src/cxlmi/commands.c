@@ -2011,7 +2011,7 @@ CXLMI_EXPORT int cxlmi_cmd_fmapi_get_virtual_cxl_switch_info(struct cxlmi_endpoi
 	struct cxlmi_cmd_fmapi_get_virtual_cxl_switch_info_rsp *rsp_pl;
 	_cleanup_free_ struct cxlmi_cci_msg *req = NULL;
 	_cleanup_free_ struct cxlmi_cci_msg *rsp = NULL;
-	ssize_t req_sz, rsp_sz;
+	ssize_t req_sz, rsp_sz, rsp_sz_min;
 	int i, rc = -1;
 
 	// Below two checks, currently limit the user on the requested number of vcs and vppbs_per_vcs,
@@ -2041,11 +2041,15 @@ CXLMI_EXPORT int cxlmi_cmd_fmapi_get_virtual_cxl_switch_info(struct cxlmi_endpoi
 	size_t vcs_info_block_max_sz = sizeof(struct cxlmi_cmd_fmapi_vcs_info_block) + in->vppb_list_limit * sizeof(struct cxlmi_cmd_fmapi_vppb_info);
 	size_t rsp_pl_sz = sizeof(*rsp_pl) + in->num_vcs * vcs_info_block_max_sz;
 	rsp_sz = sizeof(*rsp) + rsp_pl_sz;
+	size_t vcs_info_block_min_sz = sizeof(struct cxlmi_cmd_fmapi_vcs_info_block) + sizeof(struct cxlmi_cmd_fmapi_vppb_info);
+	size_t rsp_pl_min_sz = sizeof(*rsp_pl) + vcs_info_block_min_sz;
+	rsp_sz_min = sizeof(*rsp) + rsp_pl_min_sz;
+
 	rsp = calloc(1, rsp_sz);
 	if (!rsp)
 		return -1;
 
-	rc = send_cmd_cci(ep, ti, req, req_sz, rsp, rsp_sz, rsp_sz);
+	rc = send_cmd_cci(ep, ti, req, req_sz, rsp, rsp_sz, rsp_sz_min);
 	if (rc)
 		return rc;
 
