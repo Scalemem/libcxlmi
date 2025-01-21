@@ -2032,8 +2032,10 @@ CXLMI_EXPORT int cxlmi_cmd_fmapi_get_virtual_cxl_switch_info(struct cxlmi_endpoi
 	ssize_t req_sz, rsp_sz, rsp_sz_min;
 	int i, rc = -1;
 
-	// Below two checks, currently limit the user on the requested number of vcs and vppbs_per_vcs,
-	// so that the response message payload does not exceed 1024 bytes in size as stated per DSP0234.
+	/*
+	* Below two checks, currently limit the user on the requested number of vcs and vppbs_per_vcs,
+	* so that the response message payload does not exceed 1024 bytes in size as stated per DSP0234.
+	*/
 
 	if (in->vppb_list_limit < 1 || in->vppb_list_limit > MAX_VPPBS_PER_VCS)
 		return rc;
@@ -2056,9 +2058,11 @@ CXLMI_EXPORT int cxlmi_cmd_fmapi_get_virtual_cxl_switch_info(struct cxlmi_endpoi
 	for (i = 0; i < in->num_vcs; i++)
 		req_pl->vcs_ids[i] = in->vcs_ids[i];
 
+	/* The user allocated buffer for the response payload, passed in as ret, should be minimum of rsp_pl_sz */
 	size_t vcs_info_block_max_sz = sizeof(struct cxlmi_cmd_fmapi_vcs_info_block) + in->vppb_list_limit * sizeof(struct cxlmi_cmd_fmapi_vppb_info);
 	size_t rsp_pl_sz = sizeof(*rsp_pl) + in->num_vcs * vcs_info_block_max_sz;
 	rsp_sz = sizeof(*rsp) + rsp_pl_sz;
+
 	size_t vcs_info_block_min_sz = sizeof(struct cxlmi_cmd_fmapi_vcs_info_block) + sizeof(struct cxlmi_cmd_fmapi_vppb_info);
 	size_t rsp_pl_min_sz = sizeof(*rsp_pl) + vcs_info_block_min_sz;
 	rsp_sz_min = sizeof(*rsp) + rsp_pl_min_sz;
@@ -2101,7 +2105,6 @@ CXLMI_EXPORT int cxlmi_cmd_fmapi_bind_vppb(struct cxlmi_endpoint *ep,
 	CXLMI_BUILD_BUG_ON(sizeof(*in) != 6);
 
 	req_sz = sizeof(*req_pl) + sizeof(*req);
-
 	req = calloc(1, req_sz);
 	if (!req)
 		return -1;
