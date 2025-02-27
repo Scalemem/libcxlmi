@@ -2675,8 +2675,7 @@ CXLMI_EXPORT int cxlmi_cmd_fmapi_get_dcd_info(struct cxlmi_endpoint *ep,
 	ret->capacity_selection_policies = le16_to_cpu(rsp_pl->capacity_selection_policies);
 	ret->capacity_removal_policies = le16_to_cpu(rsp_pl->capacity_removal_policies);
 	ret->sanitize_on_release_config_mask = rsp_pl->sanitize_on_release_config_mask;
-	ret->total_dynamic_capacity =
-		le64_to_cpu(rsp_pl->total_dynamic_capacity) * CXL_CAPACITY_MULTIPLIER;
+	ret->total_dynamic_capacity = le64_to_cpu(rsp_pl->total_dynamic_capacity);
 
 	/* All masks copied here but only the first {num_supported_dc_regions} are valid */
 	ret->region_0_supported_blk_sz_mask =
